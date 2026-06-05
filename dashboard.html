@@ -1,969 +1,777 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OralPro — Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg:          #060b16;
-      --surface:     #0c1526;
-      --surface2:    #111e33;
-      --border:      #1a2a45;
-      --border2:     #223050;
-      --blue:        #4b8ef5;
-      --blue-dim:    #1d3a6e22;
-      --blue-glow:   rgba(75,142,245,0.15);
-      --green:       #10d98c;
-      --green-dim:   rgba(16,217,140,0.1);
-      --amber:       #f5a623;
-      --amber-dim:   rgba(245,166,35,0.1);
-      --red:         #f54b6c;
-      --red-dim:     rgba(245,75,108,0.1);
-      --purple:      #9b6ef5;
-      --purple-dim:  rgba(155,110,245,0.1);
-      --text:        #dce8ff;
-      --text2:       #7a91b5;
-      --text3:       #3d5275;
-    }
-
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      display: flex;
-      min-height: 100vh;
-      font-size: 13px;
-    }
-
-    /* ── SIDEBAR ─────────────────────────────────── */
-    .sidebar {
-      width: 228px;
-      min-height: 100vh;
-      background: var(--surface);
-      border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      position: fixed;
-      top: 0; left: 0; bottom: 0;
-      z-index: 100;
-    }
-
-    .sidebar-logo {
-      padding: 26px 22px 20px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .logo-mark {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 6px;
-    }
-
-    .logo-icon {
-      width: 32px; height: 32px;
-      background: linear-gradient(135deg, #4b8ef5, #9b6ef5);
-      border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 16px; font-weight: 800; color: white;
-    }
-
-    .logo-text { font-size: 17px; font-weight: 800; color: var(--text); letter-spacing: -0.4px; }
-    .logo-sub  { font-size: 11px; color: var(--text3); padding-left: 42px; }
-
-    .nav { padding: 16px 12px; flex: 1; }
-
-    .nav-section {
-      font-size: 10px; font-weight: 700;
-      letter-spacing: 1.2px; text-transform: uppercase;
-      color: var(--text3); padding: 10px 10px 6px;
-    }
-
-    .nav-item {
-      display: flex; align-items: center; gap: 10px;
-      padding: 8px 10px; border-radius: 8px;
-      cursor: pointer; color: var(--text2);
-      font-size: 13px; font-weight: 500;
-      transition: all 0.15s; margin-bottom: 2px;
-      position: relative;
-    }
-
-    .nav-item:hover  { background: var(--surface2); color: var(--text); }
-    .nav-item.active { background: var(--blue-glow); color: var(--blue); }
-    .nav-item.active::before {
-      content: ''; position: absolute;
-      left: 0; top: 6px; bottom: 6px;
-      width: 3px; border-radius: 2px;
-      background: var(--blue);
-    }
-
-    .nav-icon { font-size: 14px; width: 20px; text-align: center; }
-
-    .nav-badge {
-      margin-left: auto;
-      background: var(--red); color: white;
-      font-size: 10px; font-weight: 700;
-      padding: 2px 7px; border-radius: 10px;
-    }
-
-    .sidebar-footer {
-      padding: 14px 22px;
-      border-top: 1px solid var(--border);
-    }
-
-    .live-dot {
-      display: inline-block; width: 7px; height: 7px;
-      border-radius: 50%; background: var(--green);
-      box-shadow: 0 0 6px var(--green);
-      animation: blink 2s infinite; margin-right: 5px;
-    }
-
-    @keyframes blink { 0%,100% { opacity:1 } 50% { opacity:.3 } }
-
-    .footer-label { font-size: 10px; color: var(--text3); margin-bottom: 4px; }
-    .footer-value { font-size: 12px; color: var(--text2); font-weight: 500; }
-
-    /* ── MAIN ────────────────────────────────────── */
-    .main { margin-left: 228px; flex: 1; display: flex; flex-direction: column; }
-
-    /* ── TOPBAR ──────────────────────────────────── */
-    .topbar {
-      position: sticky; top: 0; z-index: 50;
-      background: rgba(6,11,22,0.88);
-      backdrop-filter: blur(14px);
-      border-bottom: 1px solid var(--border);
-      padding: 13px 28px;
-      display: flex; align-items: center; justify-content: space-between;
-    }
-
-    .topbar-title { font-size: 15px; font-weight: 700; color: var(--text); }
-
-    .topbar-right { display: flex; align-items: center; gap: 22px; }
-
-    .topbar-chip {
-      font-size: 12px; color: var(--text2);
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      padding: 4px 12px; border-radius: 20px;
-    }
-
-    .topbar-chip span { color: var(--text); font-weight: 600; }
-
-    /* ── CONTENT ─────────────────────────────────── */
-    .content { padding: 24px 28px; display: flex; flex-direction: column; gap: 20px; }
-
-    .section-label {
-      font-size: 10px; font-weight: 700;
-      letter-spacing: 1.2px; text-transform: uppercase;
-      color: var(--text3); margin-bottom: 12px;
-    }
-
-    /* ── KPI GRID ────────────────────────────────── */
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 12px;
-    }
-
-    .kpi-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px 16px 14px;
-      position: relative; overflow: hidden;
-      transition: border-color .2s, transform .15s;
-      cursor: default;
-    }
-
-    .kpi-card:hover { border-color: var(--border2); transform: translateY(-1px); }
-
-    .kpi-card::after {
-      content: '';
-      position: absolute; top: 0; left: 0; right: 0; height: 2px;
-    }
-
-    .kpi-card.c-blue::after   { background: linear-gradient(90deg, var(--blue), #6ba5ff); }
-    .kpi-card.c-green::after  { background: linear-gradient(90deg, var(--green), #4dffc3); }
-    .kpi-card.c-amber::after  { background: linear-gradient(90deg, var(--amber), #ffc96b); }
-    .kpi-card.c-red::after    { background: linear-gradient(90deg, var(--red), #ff8fa5); }
-    .kpi-card.c-purple::after { background: linear-gradient(90deg, var(--purple), #c4a4ff); }
-
-    .kpi-label { font-size: 11px; color: var(--text2); font-weight: 500; margin-bottom: 10px; }
-
-    .kpi-value {
-      font-size: 24px; font-weight: 800;
-      color: var(--text); letter-spacing: -1px; line-height: 1;
-    }
-
-    .kpi-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
-
-    .kpi-trend {
-      display: inline-flex; align-items: center; gap: 3px;
-      font-size: 11px; font-weight: 700;
-      padding: 2px 7px; border-radius: 5px;
-    }
-
-    .up   { color: var(--green); background: var(--green-dim); }
-    .down { color: var(--red);   background: var(--red-dim);   }
-    .warn { color: var(--amber); background: var(--amber-dim); }
-
-    .kpi-sub { font-size: 11px; color: var(--text3); }
-
-    /* ── CARD ────────────────────────────────────── */
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px; overflow: hidden;
-    }
-
-    .card-header {
-      padding: 15px 20px;
-      border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; justify-content: space-between;
-    }
-
-    .card-title { font-size: 13px; font-weight: 700; color: var(--text); }
-    .card-sub   { font-size: 11px; color: var(--text2); margin-top: 2px; }
-
-    .pill {
-      font-size: 11px; font-weight: 600;
-      padding: 3px 11px; border-radius: 20px;
-    }
-
-    .pill.blue   { background: var(--blue-glow);   color: var(--blue);   border: 1px solid rgba(75,142,245,.3); }
-    .pill.green  { background: var(--green-dim);   color: var(--green);  border: 1px solid rgba(16,217,140,.3); }
-    .pill.amber  { background: var(--amber-dim);   color: var(--amber);  border: 1px solid rgba(245,166,35,.3); }
-    .pill.red    { background: var(--red-dim);     color: var(--red);    border: 1px solid rgba(245,75,108,.3); }
-    .pill.purple { background: var(--purple-dim);  color: var(--purple); border: 1px solid rgba(155,110,245,.3); }
-
-    .card-body { padding: 20px; }
-
-    /* ── LAYOUTS ─────────────────────────────────── */
-    .g2   { display: grid; grid-template-columns: 1fr 1fr;       gap: 20px; }
-    .g3-2 { display: grid; grid-template-columns: 3fr 2fr;       gap: 20px; }
-
-    /* ── CHART ───────────────────────────────────── */
-    .ch    { position: relative; height: 200px; }
-    .ch-sm { position: relative; height: 155px; }
-
-    /* ── PIPELINE ────────────────────────────────── */
-    .stage {
-      display: flex; align-items: center; gap: 12px;
-      padding: 9px 0; border-bottom: 1px solid var(--border);
-    }
-    .stage:last-child { border-bottom: none; }
-
-    .stage-name { width: 140px; font-size: 12px; color: var(--text2); flex-shrink: 0; }
-
-    .bar-wrap { flex: 1; height: 5px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
-    .bar      { height: 100%; border-radius: 3px; transition: width .7s ease; }
-
-    .stage-n { width: 36px; text-align: right; font-size: 13px; font-weight: 700; color: var(--text); }
-    .stage-v { width: 76px; text-align: right; font-size: 11px; color: var(--text2); }
-
-    /* ── MINI STATS ──────────────────────────────── */
-    .mini-grid { display: grid; gap: 10px; margin-top: 16px; }
-    .mini-grid.cols3 { grid-template-columns: repeat(3,1fr); }
-    .mini-grid.cols2 { grid-template-columns: repeat(2,1fr); }
-
-    .mini-stat {
-      background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 8px; padding: 11px; text-align: center;
-    }
-
-    .ms-val   { font-size: 18px; font-weight: 800; line-height: 1; }
-    .ms-label { font-size: 10px; color: var(--text2); margin-top: 4px; line-height: 1.3; }
-
-    /* ── PROGRESS ────────────────────────────────── */
-    .prog { margin-bottom: 13px; }
-    .prog:last-child { margin-bottom: 0; }
-
-    .prog-head { display: flex; justify-content: space-between; margin-bottom: 5px; }
-    .prog-label { font-size: 12px; color: var(--text2); }
-    .prog-val   { font-size: 12px; font-weight: 700; color: var(--text); }
-
-    .prog-track { height: 5px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
-    .prog-fill  { height: 100%; border-radius: 3px; }
-
-    /* ── ACCOUNTS ────────────────────────────────── */
-    .account {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 13px 0; border-bottom: 1px solid var(--border);
-    }
-    .account:last-child { border-bottom: none; }
-
-    .acc-left { display: flex; align-items: center; gap: 12px; }
-
-    .acc-icon {
-      width: 38px; height: 38px; border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 15px; font-weight: 800;
-    }
-
-    .acc-name { font-size: 13px; font-weight: 700; color: var(--text); }
-    .acc-sub  { font-size: 11px; color: var(--text2); margin-top: 2px; }
-    .acc-amt  { font-size: 19px; font-weight: 800; color: var(--text); line-height: 1; }
-    .acc-mov  { font-size: 11px; margin-top: 3px; }
-
-    /* ── TABLE ───────────────────────────────────── */
-    .tbl { width: 100%; border-collapse: collapse; }
-
-    .tbl th {
-      text-align: left;
-      font-size: 10px; font-weight: 700;
-      text-transform: uppercase; letter-spacing: .6px;
-      color: var(--text3); padding: 10px 14px;
-      border-bottom: 1px solid var(--border);
-      white-space: nowrap;
-    }
-
-    .tbl td {
-      padding: 10px 14px; font-size: 12px;
-      color: var(--text2); border-bottom: 1px solid var(--border);
-      white-space: nowrap;
-    }
-
-    .tbl tr:last-child td { border-bottom: none; }
-    .tbl tr:hover td { background: var(--surface2); color: var(--text); }
-
-    .tbl .b  { font-weight: 700; color: var(--text); }
-    .tbl .g  { color: var(--green); font-weight: 700; }
-    .tbl .r  { color: var(--red);   font-weight: 700; }
-    .tbl .a  { color: var(--amber); font-weight: 700; }
-    .tbl .bl { color: var(--blue);  font-weight: 700; }
-
-    .status-dot {
-      display: inline-flex; align-items: center; gap: 5px;
-      font-size: 11px; font-weight: 600;
-    }
-
-    /* ── ALERTS ──────────────────────────────────── */
-    .alerts { display: flex; flex-direction: column; gap: 8px; }
-
-    .alert-item {
-      display: flex; align-items: flex-start; gap: 14px;
-      padding: 14px 16px; border-radius: 10px;
-      border-left: 3px solid transparent;
-    }
-
-    .alert-item.red    { background: var(--red-dim);    border-left-color: var(--red);    }
-    .alert-item.amber  { background: var(--amber-dim);  border-left-color: var(--amber);  }
-    .alert-item.blue   { background: var(--blue-glow);  border-left-color: var(--blue);   }
-
-    .alert-icon  { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
-    .alert-title { font-size: 13px; font-weight: 700; color: var(--text); }
-    .alert-desc  { font-size: 12px; color: var(--text2); margin-top: 3px; line-height: 1.5; }
-    .alert-meta  { font-size: 11px; color: var(--text3); margin-top: 5px; }
-
-    /* ── DIVIDER ─────────────────────────────────── */
-    .div { height: 1px; background: var(--border); margin: 16px 0; }
-
-    /* ── FOOTER TAG ROW ──────────────────────────── */
-    .tag-row { display: flex; gap: 8px; flex-wrap: wrap; }
-    .tag {
-      font-size: 11px; font-weight: 600;
-      padding: 3px 10px; border-radius: 6px;
-    }
-
-    /* ── SCROLLBAR ───────────────────────────────── */
-    ::-webkit-scrollbar { width: 5px; height: 5px; }
-    ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>OralPro · Management Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+  :root{
+    /* brand */
+    --blue:#2f35d6;
+    --blue-soft:#eceefc;
+    --orange:#ff5a45;
+    --orange-soft:#ffecea;
+
+    /* light theme (default) */
+    --bg:#f5f6fa;
+    --surface:#ffffff;
+    --surface-2:#fafbfd;
+    --text:#15171f;
+    --text-2:#646c80;
+    --text-3:#9aa2b4;
+    --border:#e8eaf1;
+    --border-2:#dfe2ec;
+    --green:#1f9d6b;
+    --green-soft:#e6f5ef;
+    --amber:#c98a16;
+    --amber-soft:#fbf2df;
+    --red:#d63a4f;
+    --red-soft:#fbe9ec;
+    --shadow:0 1px 2px rgba(20,22,35,.04),0 4px 16px rgba(20,22,35,.04);
+  }
+
+  body.dark{
+    --bg:#0d0f17;
+    --surface:#161925;
+    --surface-2:#1c2030;
+    --text:#eef0f7;
+    --text-2:#99a1b6;
+    --text-3:#5f6781;
+    --border:#262b3b;
+    --border-2:#303650;
+    --blue:#5b62f0;
+    --blue-soft:#1c2142;
+    --orange:#ff6f5c;
+    --orange-soft:#3a1f1c;
+    --green:#3bbd87;
+    --green-soft:#13291f;
+    --amber:#e0a93a;
+    --amber-soft:#2e2510;
+    --red:#f0586c;
+    --red-soft:#311419;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 18px rgba(0,0,0,.25);
+  }
+
+  body{
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+    background:var(--bg);color:var(--text);
+    display:flex;min-height:100vh;font-size:13px;
+    transition:background .25s,color .25s;
+  }
+
+  /* ─── SIDEBAR ────────────────────────────── */
+  .sidebar{
+    width:230px;position:fixed;inset:0 auto 0 0;
+    background:var(--surface);border-right:1px solid var(--border);
+    display:flex;flex-direction:column;z-index:50;
+    transition:background .25s,border-color .25s;
+  }
+  .brand{
+    display:flex;align-items:center;gap:11px;
+    padding:22px 22px 18px;border-bottom:1px solid var(--border);
+  }
+  .brand-logo{
+    width:38px;height:38px;flex-shrink:0;
+    border-radius:10px;background:var(--blue-soft);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .brand-logo svg{width:24px;height:24px;display:block}
+  .brand-name{font-size:16px;font-weight:800;letter-spacing:-.3px}
+  .brand-name span{color:var(--blue)}
+  .brand-sub{font-size:10.5px;color:var(--text-3);margin-top:1px;font-weight:500}
+
+  .nav{padding:14px 12px;flex:1;overflow-y:auto}
+  .nav-label{
+    font-size:10px;font-weight:700;letter-spacing:1px;
+    text-transform:uppercase;color:var(--text-3);
+    padding:10px 10px 6px;
+  }
+  .nav-item{
+    display:flex;align-items:center;gap:11px;
+    padding:9px 11px;border-radius:9px;cursor:pointer;
+    color:var(--text-2);font-size:13px;font-weight:500;
+    margin-bottom:2px;transition:background .15s,color .15s;
+    user-select:none;
+  }
+  .nav-item:hover{background:var(--surface-2);color:var(--text)}
+  .nav-item.active{background:var(--blue-soft);color:var(--blue);font-weight:600}
+  .nav-ic{width:18px;height:18px;flex-shrink:0;stroke-width:1.9}
+  .nav-badge{
+    margin-left:auto;background:var(--orange);color:#fff;
+    font-size:10px;font-weight:700;padding:1px 7px;border-radius:9px;
+  }
+
+  .side-foot{padding:14px 18px;border-top:1px solid var(--border)}
+  .sources{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+  .src{
+    font-size:10px;font-weight:600;color:var(--text-2);
+    background:var(--surface-2);border:1px solid var(--border);
+    padding:2px 7px;border-radius:5px;
+  }
+  .sync{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-2)}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--green);
+    box-shadow:0 0 0 3px var(--green-soft);animation:pulse 2.4s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+  /* ─── MAIN ───────────────────────────────── */
+  .main{margin-left:230px;flex:1;display:flex;flex-direction:column;min-width:0}
+
+  .topbar{
+    position:sticky;top:0;z-index:40;
+    background:color-mix(in srgb,var(--bg) 80%,transparent);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border);
+    padding:14px 30px;display:flex;align-items:center;
+    justify-content:space-between;gap:20px;flex-wrap:wrap;
+  }
+  .tb-title{font-size:17px;font-weight:800;letter-spacing:-.4px}
+  .tb-sub{font-size:12px;color:var(--text-2);margin-top:1px}
+  .tb-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+
+  .date-group{
+    display:flex;align-items:center;gap:8px;
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:9px;padding:6px 10px;box-shadow:var(--shadow);
+  }
+  .date-group label{font-size:11px;color:var(--text-3);font-weight:600}
+  .date-group input[type=date]{
+    border:none;background:transparent;color:var(--text);
+    font-family:inherit;font-size:12px;font-weight:600;
+    cursor:pointer;outline:none;
+  }
+  .date-sep{color:var(--text-3);font-size:12px}
+
+  .icon-btn{
+    width:36px;height:36px;border-radius:9px;
+    background:var(--surface);border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;color:var(--text-2);box-shadow:var(--shadow);
+    transition:color .15s,border-color .15s;
+  }
+  .icon-btn:hover{color:var(--blue);border-color:var(--blue)}
+  .icon-btn svg{width:17px;height:17px;stroke-width:1.9}
+
+  .content{padding:24px 30px;display:flex;flex-direction:column;gap:22px}
+
+  /* ─── TAB PANELS ─────────────────────────── */
+  .tab{display:none;flex-direction:column;gap:22px;animation:fade .25s ease}
+  .tab.active{display:flex}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  /* ─── CARD ───────────────────────────────── */
+  .card{
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:14px;box-shadow:var(--shadow);
+    transition:background .25s,border-color .25s;
+  }
+  .card-head{
+    padding:16px 20px;border-bottom:1px solid var(--border);
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+  }
+  .card-title{font-size:14px;font-weight:700}
+  .card-sub{font-size:11.5px;color:var(--text-2);margin-top:2px}
+  .card-body{padding:20px}
+
+  .pill{font-size:11px;font-weight:600;padding:4px 11px;border-radius:20px;white-space:nowrap}
+  .pill.blue{background:var(--blue-soft);color:var(--blue)}
+  .pill.orange{background:var(--orange-soft);color:var(--orange)}
+  .pill.green{background:var(--green-soft);color:var(--green)}
+  .pill.amber{background:var(--amber-soft);color:var(--amber)}
+  .pill.red{background:var(--red-soft);color:var(--red)}
+
+  /* ─── GRIDS ──────────────────────────────── */
+  .grid-kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .g2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .g32{display:grid;grid-template-columns:3fr 2fr;gap:20px}
+  @media(max-width:1100px){.grid-kpi{grid-template-columns:repeat(2,1fr)}.g2,.g32{grid-template-columns:1fr}}
+
+  /* ─── KPI ────────────────────────────────── */
+  .kpi{
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:14px;padding:18px;box-shadow:var(--shadow);
+  }
+  .kpi-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .kpi-ic{
+    width:34px;height:34px;border-radius:9px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .kpi-ic svg{width:18px;height:18px;stroke-width:2}
+  .kpi-label{font-size:11.5px;color:var(--text-2);font-weight:500}
+  .kpi-val{font-size:27px;font-weight:800;letter-spacing:-1px;line-height:1;margin:7px 0 9px}
+  .kpi-foot{display:flex;align-items:center;gap:7px}
+  .trend{display:inline-flex;align-items:center;gap:3px;font-size:11.5px;font-weight:700;padding:2px 7px;border-radius:6px}
+  .trend.up{color:var(--green);background:var(--green-soft)}
+  .trend.down{color:var(--red);background:var(--red-soft)}
+  .kpi-note{font-size:11px;color:var(--text-3)}
+
+  /* ─── CHARTS ─────────────────────────────── */
+  .ch{position:relative;height:240px}
+  .ch-sm{position:relative;height:170px}
+
+  /* ─── PIPELINE STAGES ────────────────────── */
+  .stage{display:flex;align-items:center;gap:14px;padding:11px 0;border-bottom:1px solid var(--border)}
+  .stage:last-child{border-bottom:none}
+  .stage-name{width:150px;font-size:12.5px;color:var(--text-2);flex-shrink:0;font-weight:500}
+  .track{flex:1;height:7px;background:var(--surface-2);border-radius:4px;overflow:hidden}
+  .fill{height:100%;border-radius:4px}
+  .stage-n{width:34px;text-align:right;font-size:14px;font-weight:700}
+  .stage-v{width:84px;text-align:right;font-size:11.5px;color:var(--text-2);font-weight:600}
+
+  .mini{display:grid;gap:11px;margin-top:18px}
+  .mini.c3{grid-template-columns:repeat(3,1fr)}
+  .mini.c2{grid-template-columns:repeat(2,1fr)}
+  .mini-box{background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:13px;text-align:center}
+  .mini-val{font-size:19px;font-weight:800;line-height:1}
+  .mini-lbl{font-size:10.5px;color:var(--text-2);margin-top:5px;line-height:1.3}
+
+  /* ─── PROGRESS ───────────────────────────── */
+  .prog{margin-bottom:15px}.prog:last-child{margin-bottom:0}
+  .prog-head{display:flex;justify-content:space-between;margin-bottom:6px}
+  .prog-lbl{font-size:12.5px;color:var(--text-2);font-weight:500}
+  .prog-val{font-size:12.5px;font-weight:700}
+  .prog-track{height:7px;background:var(--surface-2);border-radius:4px;overflow:hidden}
+  .prog-fill{height:100%;border-radius:4px}
+
+  /* ─── ACCOUNTS ───────────────────────────── */
+  .acc{display:flex;align-items:center;justify-content:space-between;padding:15px 0;border-bottom:1px solid var(--border)}
+  .acc:last-child{border-bottom:none}
+  .acc-l{display:flex;align-items:center;gap:13px}
+  .acc-ic{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800}
+  .acc-name{font-size:13.5px;font-weight:700}
+  .acc-sub{font-size:11px;color:var(--text-2);margin-top:2px}
+  .acc-amt{font-size:20px;font-weight:800;line-height:1}
+  .acc-mov{font-size:11px;margin-top:4px;font-weight:600}
+
+  /* ─── TABLE ──────────────────────────────── */
+  .tbl-wrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse}
+  th{text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-3);padding:11px 16px;border-bottom:1px solid var(--border);white-space:nowrap}
+  td{padding:12px 16px;font-size:12.5px;color:var(--text-2);border-bottom:1px solid var(--border);white-space:nowrap}
+  tr:last-child td{border-bottom:none}
+  tbody tr{transition:background .12s}
+  tbody tr:hover td{background:var(--surface-2)}
+  td.b{font-weight:700;color:var(--text)}
+  .g{color:var(--green);font-weight:700}.r{color:var(--red);font-weight:700}
+  .a{color:var(--amber);font-weight:700}.bl{color:var(--blue);font-weight:700}
+  .st{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600}
+  .st-d{width:7px;height:7px;border-radius:50%}
+
+  /* ─── ALERTS ─────────────────────────────── */
+  .alerts{display:flex;flex-direction:column;gap:10px}
+  .alert{display:flex;gap:14px;padding:15px 17px;border-radius:11px;border:1px solid var(--border);border-left-width:3px}
+  .alert.red{border-left-color:var(--red);background:var(--red-soft)}
+  .alert.amber{border-left-color:var(--amber);background:var(--amber-soft)}
+  .alert.blue{border-left-color:var(--blue);background:var(--blue-soft)}
+  .alert-ic{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--surface)}
+  .alert-ic svg{width:18px;height:18px;stroke-width:2}
+  .alert-t{font-size:13px;font-weight:700}
+  .alert-d{font-size:12px;color:var(--text-2);margin-top:3px;line-height:1.5}
+  .alert-m{font-size:11px;color:var(--text-3);margin-top:5px;font-weight:500}
+
+  .tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+  .divline{height:1px;background:var(--border);margin:18px 0}
+
+  ::-webkit-scrollbar{width:8px;height:8px}
+  ::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:4px}
+  ::-webkit-scrollbar-track{background:transparent}
+</style>
 </head>
 <body>
 
-<!-- ═══ SIDEBAR ═══════════════════════════════════════════════ -->
+<!-- ════ SIDEBAR ════ -->
 <aside class="sidebar">
-  <div class="sidebar-logo">
-    <div class="logo-mark">
-      <div class="logo-icon">O</div>
-      <div class="logo-text">OralPro</div>
+  <div class="brand">
+    <div class="brand-logo">
+      <!-- tooth + heartbeat -->
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M6 3.2C4.2 3.2 3 4.8 3 7c0 2 .6 3.4 1.1 5.4.4 1.7.5 4 1.2 6.3.3 1 .8 1.9 1.6 1.9.9 0 1.1-1 1.3-2.1.3-1.6.5-3.4 1.8-3.4s1.5 1.8 1.8 3.4c.2 1.1.4 2.1 1.3 2.1.8 0 1.3-.9 1.6-1.9.7-2.3.8-4.6 1.2-6.3C18.4 10.4 21 9 21 7c0-2.2-1.2-3.8-3-3.8-1.8 0-3 1.3-6 1.3S7.8 3.2 6 3.2Z" stroke="#2f35d6" stroke-width="1.6" stroke-linejoin="round"/>
+        <path d="M2 12h4l1.5-3 2 6 1.8-4 1.4 2H22" stroke="#ff5a45" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
     </div>
-    <div class="logo-sub">Management Dashboard</div>
+    <div>
+      <div class="brand-name">ORAL<span>PRO</span></div>
+      <div class="brand-sub">Management Suite</div>
+    </div>
   </div>
 
   <nav class="nav">
-    <div class="nav-section">Principale</div>
-    <div class="nav-item active">
-      <span class="nav-icon">▣</span> Panoramica
+    <div class="nav-label">Principale</div>
+    <div class="nav-item active" data-tab="overview">
+      <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+      Panoramica
     </div>
-    <div class="nav-item">
-      <span class="nav-icon">◈</span> Pipeline
+    <div class="nav-item" data-tab="pipeline">
+      <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 5h16M7 12h10M10 19h4" stroke-linecap="round"/></svg>
+      Pipeline
     </div>
-    <div class="nav-item">
-      <span class="nav-icon">◇</span> Abbonamenti
+    <div class="nav-item" data-tab="subs">
+      <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12a9 9 0 1 1-3.3-7" stroke-linecap="round"/><path d="M21 4v5h-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Abbonamenti
     </div>
-    <div class="nav-item">
-      <span class="nav-icon">◆</span> Liquidità
+    <div class="nav-item" data-tab="cash">
+      <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.4"/></svg>
+      Liquidità
     </div>
-    <div class="nav-item">
-      <span class="nav-icon">◎</span> Campagne
+    <div class="nav-item" data-tab="ads">
+      <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 11v2a1 1 0 0 0 1 1h2l4 4V6L6 10H4a1 1 0 0 0-1 1Z" stroke-linejoin="round"/><path d="M15 8a4 4 0 0 1 0 8" stroke-linecap="round"/></svg>
+      Campagne
     </div>
 
-    <div class="nav-section" style="margin-top:12px">Sistema</div>
-    <div class="nav-item">
-      <span class="nav-icon">⚠</span> Alert
+    <div class="nav-label" style="margin-top:10px">Sistema</div>
+    <div class="nav-item" data-tab="alerts">
+      <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 4a6 6 0 0 0-6 6c0 4-2 5-2 5h16s-2-1-2-5a6 6 0 0 0-6-6Z" stroke-linejoin="round"/><path d="M10 20a2 2 0 0 0 4 0" stroke-linecap="round"/></svg>
+      Alert
       <span class="nav-badge">5</span>
-    </div>
-    <div class="nav-item">
-      <span class="nav-icon">⚙</span> Impostazioni
     </div>
   </nav>
 
-  <div class="sidebar-footer">
-    <div class="footer-label">Stato sistema</div>
-    <div class="footer-value">
-      <span class="live-dot"></span>Live · 5 giu 2026, 09:41
-    </div>
-    <div style="margin-top:8px; font-size:11px; color:var(--text3)">
-      Close · Stripe · Meta · Wise · Revolut · Mercury
+  <div class="side-foot">
+    <div class="sync"><span class="dot"></span> Sincronizzato · 09:41</div>
+    <div class="sources">
+      <span class="src">Close</span><span class="src">Stripe</span><span class="src">Meta</span>
+      <span class="src">Wise</span><span class="src">Revolut</span><span class="src">Mercury</span>
     </div>
   </div>
 </aside>
 
-<!-- ═══ MAIN ══════════════════════════════════════════════════ -->
+<!-- ════ MAIN ════ -->
 <main class="main">
-
-  <!-- TOPBAR -->
   <div class="topbar">
-    <div class="topbar-title">Panoramica Generale</div>
-    <div class="topbar-right">
-      <div class="topbar-chip">Periodo: <span>Giugno 2026</span></div>
-      <div class="topbar-chip">Confronto: <span>vs Maggio 2026</span></div>
-      <div class="live-dot" style="margin:0"></div>
+    <div>
+      <div class="tb-title" id="pageTitle">Panoramica Generale</div>
+      <div class="tb-sub" id="pageSub">Visione consolidata · tutte le fonti</div>
+    </div>
+    <div class="tb-right">
+      <div class="date-group">
+        <label>Dal</label>
+        <input type="date" id="dateFrom" value="2026-05-01" />
+        <span class="date-sep">→</span>
+        <label>Al</label>
+        <input type="date" id="dateTo" value="2026-06-05" />
+      </div>
+      <div class="icon-btn" id="themeBtn" title="Cambia tema">
+        <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" stroke-linejoin="round"/></svg>
+      </div>
     </div>
   </div>
 
   <div class="content">
 
-    <!-- ── KPI ───────────────────────────────────── -->
-    <div>
-      <div class="section-label">KPI Principali</div>
-      <div class="kpi-grid">
-
-        <div class="kpi-card c-blue">
-          <div class="kpi-label">Entrate Mensili Ricorrenti</div>
-          <div class="kpi-value">€38.450</div>
-          <div class="kpi-row">
-            <span class="kpi-trend up">▲ +8.4%</span>
-            <span class="kpi-sub">vs €35.470</span>
+    <!-- ═══ TAB: PANORAMICA ═══ -->
+    <section class="tab active" id="tab-overview">
+      <div class="grid-kpi">
+        <div class="kpi">
+          <div class="kpi-top">
+            <span class="kpi-label">Entrate ricorrenti / mese</span>
+            <span class="kpi-ic" style="background:var(--blue-soft);color:var(--blue)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 18 9 12l4 4 7-9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
           </div>
+          <div class="kpi-val">€38.450</div>
+          <div class="kpi-foot"><span class="trend up">↑ 8,4%</span><span class="kpi-note">vs €35.470</span></div>
         </div>
-
-        <div class="kpi-card c-blue">
-          <div class="kpi-label">Entrate Annuali Ricorrenti</div>
-          <div class="kpi-value">€461.4k</div>
-          <div class="kpi-row">
-            <span class="kpi-trend up">▲ +11.2%</span>
-            <span class="kpi-sub">proiezione</span>
+        <div class="kpi">
+          <div class="kpi-top">
+            <span class="kpi-label">Liquidità totale</span>
+            <span class="kpi-ic" style="background:var(--green-soft);color:var(--green)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.2"/></svg></span>
           </div>
+          <div class="kpi-val">€124.830</div>
+          <div class="kpi-foot"><span class="trend up">↑ 3,1%</span><span class="kpi-note">3 conti</span></div>
         </div>
-
-        <div class="kpi-card c-green">
-          <div class="kpi-label">Liquidità Totale</div>
-          <div class="kpi-value">€124.8k</div>
-          <div class="kpi-row">
-            <span class="kpi-trend up">▲ +3.1%</span>
-            <span class="kpi-sub">3 conti</span>
+        <div class="kpi">
+          <div class="kpi-top">
+            <span class="kpi-label">Nuovi clienti</span>
+            <span class="kpi-ic" style="background:var(--orange-soft);color:var(--orange)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0M17 8h4M19 6v4" stroke-linecap="round"/></svg></span>
           </div>
+          <div class="kpi-val">27</div>
+          <div class="kpi-foot"><span class="trend up">↑ +4</span><span class="kpi-note">target 30</span></div>
         </div>
-
-        <div class="kpi-card c-green">
-          <div class="kpi-label">Nuovi Clienti</div>
-          <div class="kpi-value">27</div>
-          <div class="kpi-row">
-            <span class="kpi-trend up">▲ +4</span>
-            <span class="kpi-sub">target: 30</span>
+        <div class="kpi">
+          <div class="kpi-top">
+            <span class="kpi-label">Ritorno pubblicità</span>
+            <span class="kpi-ic" style="background:var(--amber-soft);color:var(--amber)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3v18M5 8l7-5 7 5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
           </div>
+          <div class="kpi-val">4,2×</div>
+          <div class="kpi-foot"><span class="trend up">↑ 0,3×</span><span class="kpi-note">€15.860 spesi</span></div>
         </div>
-
-        <div class="kpi-card c-red">
-          <div class="kpi-label">Clienti Persi</div>
-          <div class="kpi-value">8</div>
-          <div class="kpi-row">
-            <span class="kpi-trend down">▼ 1.6%</span>
-            <span class="kpi-sub">vs 11 maggio</span>
-          </div>
-        </div>
-
-        <div class="kpi-card c-purple">
-          <div class="kpi-label">Ritorno Pubblicità</div>
-          <div class="kpi-value">4.2x</div>
-          <div class="kpi-row">
-            <span class="kpi-trend up">▲ +0.3x</span>
-            <span class="kpi-sub">€15.860 spesi</span>
-          </div>
-        </div>
-
       </div>
-    </div>
 
-    <!-- ── PIPELINE + ABBONAMENTI ─────────────────── -->
-    <div class="g3-2">
+      <div class="g32">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Andamento entrate</div>
+              <div class="card-sub">Stripe + bonifici · ultimi 6 mesi</div>
+            </div>
+            <span class="pill blue">6 mesi</span>
+          </div>
+          <div class="card-body"><div class="ch"><canvas id="ovRevenue"></canvas></div></div>
+        </div>
 
-      <!-- Pipeline -->
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Origine clienti</div>
+              <div class="card-sub">Canali di acquisizione · Close</div>
+            </div>
+          </div>
+          <div class="card-body"><div class="ch"><canvas id="ovSource"></canvas></div></div>
+        </div>
+      </div>
+
+      <div class="g2">
+        <div class="card">
+          <div class="card-head"><div class="card-title">Sintesi finanziaria</div><span class="pill green">In utile</span></div>
+          <div class="card-body">
+            <div class="prog"><div class="prog-head"><span class="prog-lbl">Entrate del mese</span><span class="prog-val" style="color:var(--green)">€41.650</span></div><div class="prog-track"><div class="prog-fill" style="width:100%;background:var(--green)"></div></div></div>
+            <div class="prog"><div class="prog-head"><span class="prog-lbl">Uscite del mese</span><span class="prog-val" style="color:var(--red)">€23.480</span></div><div class="prog-track"><div class="prog-fill" style="width:56%;background:var(--red)"></div></div></div>
+            <div class="prog"><div class="prog-head"><span class="prog-lbl">Utile netto</span><span class="prog-val" style="color:var(--blue)">€18.170</span></div><div class="prog-track"><div class="prog-fill" style="width:44%;background:var(--blue)"></div></div></div>
+            <div class="mini c3">
+              <div class="mini-box"><div class="mini-val" style="color:var(--green)">43,6%</div><div class="mini-lbl">Margine netto</div></div>
+              <div class="mini-box"><div class="mini-val" style="color:var(--blue)">€461k</div><div class="mini-lbl">Entrate annue prev.</div></div>
+              <div class="mini-box"><div class="mini-val" style="color:var(--orange)">€82</div><div class="mini-lbl">Valore medio cliente</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><div class="card-title">Stato fonti dati</div><span class="pill green">6 / 6 attive</span></div>
+          <div class="card-body">
+            <div class="tbl-wrap"><table>
+              <tbody>
+                <tr><td class="b">Close CRM</td><td>274 deal attivi</td><td><span class="st" style="color:var(--green)"><span class="st-d" style="background:var(--green)"></span>Live · 2 min fa</span></td></tr>
+                <tr><td class="b">Stripe</td><td>505 abbonamenti</td><td><span class="st" style="color:var(--green)"><span class="st-d" style="background:var(--green)"></span>Live · ora</span></td></tr>
+                <tr><td class="b">Meta Ads</td><td>3 account</td><td><span class="st" style="color:var(--green)"><span class="st-d" style="background:var(--green)"></span>Live · 8 min fa</span></td></tr>
+                <tr><td class="b">Wise</td><td>EUR / GBP / USD</td><td><span class="st" style="color:var(--green)"><span class="st-d" style="background:var(--green)"></span>Sync · 2h fa</span></td></tr>
+                <tr><td class="b">Revolut</td><td>EUR / USD / GBP</td><td><span class="st" style="color:var(--green)"><span class="st-d" style="background:var(--green)"></span>Sync · 5h fa</span></td></tr>
+                <tr><td class="b">Mercury</td><td>USD → EUR</td><td><span class="st" style="color:var(--amber)"><span class="st-d" style="background:var(--amber)"></span>Ritardo · 14h</span></td></tr>
+              </tbody>
+            </table></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ TAB: PIPELINE ═══ -->
+    <section class="tab" id="tab-pipeline">
+      <div class="grid-kpi">
+        <div class="kpi"><div class="kpi-top"><span class="kpi-label">Deal attivi</span></div><div class="kpi-val">274</div><div class="kpi-foot"><span class="trend up">↑ +18</span><span class="kpi-note">questo mese</span></div></div>
+        <div class="kpi"><div class="kpi-top"><span class="kpi-label">Valore potenziale</span></div><div class="kpi-val">€1,05M</div><div class="kpi-foot"><span class="kpi-note">pipeline totale</span></div></div>
+        <div class="kpi"><div class="kpi-top"><span class="kpi-label">Chiusi questo mese</span></div><div class="kpi-val" style="color:var(--green)">27</div><div class="kpi-foot"><span class="kpi-note">€162.000</span></div></div>
+        <div class="kpi"><div class="kpi-top"><span class="kpi-label">Tasso di chiusura</span></div><div class="kpi-val">19%</div><div class="kpi-foot"><span class="trend up">↑ 2,1%</span></div></div>
+      </div>
+
+      <div class="g32">
+        <div class="card">
+          <div class="card-head"><div><div class="card-title">Pipeline per fase</div><div class="card-sub">Close CRM · 274 deal attivi</div></div><span class="pill orange">+18 nuovi</span></div>
+          <div class="card-body">
+            <div class="stage"><span class="stage-name">Primo contatto</span><div class="track"><div class="fill" style="width:100%;background:var(--blue)"></div></div><span class="stage-n" style="color:var(--blue)">142</span><span class="stage-v">€284.000</span></div>
+            <div class="stage"><span class="stage-name">In trattativa</span><div class="track"><div class="fill" style="width:61%;background:#6b70e8"></div></div><span class="stage-n">87</span><span class="stage-v">€348.000</span></div>
+            <div class="stage"><span class="stage-name">Proposta inviata</span><div class="track"><div class="fill" style="width:30%;background:var(--orange)"></div></div><span class="stage-n">43</span><span class="stage-v">€258.000</span></div>
+            <div class="stage"><span class="stage-name">Chiusi vinti</span><div class="track"><div class="fill" style="width:19%;background:var(--green)"></div></div><span class="stage-n" style="color:var(--green)">27</span><span class="stage-v" style="color:var(--green)">€162.000</span></div>
+            <div class="stage"><span class="stage-name">Persi</span><div class="track"><div class="fill" style="width:8%;background:var(--red)"></div></div><span class="stage-n" style="color:var(--red)">12</span><span class="stage-v">—</span></div>
+            <div class="mini c3">
+              <div class="mini-box"><div class="mini-val" style="color:var(--blue)">61%</div><div class="mini-lbl">Contatto → Trattativa</div></div>
+              <div class="mini-box"><div class="mini-val" style="color:var(--orange)">49%</div><div class="mini-lbl">Trattativa → Proposta</div></div>
+              <div class="mini-box"><div class="mini-val" style="color:var(--green)">63%</div><div class="mini-lbl">Proposta → Chiuso</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><div class="card-title">Previsione chiusure</div><span class="pill blue">Giugno</span></div>
+          <div class="card-body"><div class="ch"><canvas id="pipForecast"></canvas></div></div>
+        </div>
+      </div>
+
       <div class="card">
-        <div class="card-header">
-          <div>
-            <div class="card-title">Pipeline Commerciale</div>
-            <div class="card-sub">Close CRM — 274 deal attivi · €1.052.000 valore potenziale</div>
-          </div>
-          <span class="pill amber">+18 questo mese</span>
-        </div>
-        <div class="card-body">
-
-          <div class="stage">
-            <span class="stage-name">Primo contatto</span>
-            <div class="bar-wrap"><div class="bar" style="width:100%; background:var(--blue)"></div></div>
-            <span class="stage-n">142</span>
-            <span class="stage-v">€284.000</span>
-          </div>
-          <div class="stage">
-            <span class="stage-name">In trattativa</span>
-            <div class="bar-wrap"><div class="bar" style="width:61%; background:var(--purple)"></div></div>
-            <span class="stage-n">87</span>
-            <span class="stage-v">€348.000</span>
-          </div>
-          <div class="stage">
-            <span class="stage-name">Proposta inviata</span>
-            <div class="bar-wrap"><div class="bar" style="width:30%; background:var(--amber)"></div></div>
-            <span class="stage-n">43</span>
-            <span class="stage-v">€258.000</span>
-          </div>
-          <div class="stage">
-            <span class="stage-name">Chiusi ✓</span>
-            <div class="bar-wrap"><div class="bar" style="width:19%; background:var(--green)"></div></div>
-            <span class="stage-n" style="color:var(--green)">27</span>
-            <span class="stage-v" style="color:var(--green)">€162.000</span>
-          </div>
-          <div class="stage">
-            <span class="stage-name">Persi ✗</span>
-            <div class="bar-wrap"><div class="bar" style="width:8%; background:var(--red)"></div></div>
-            <span class="stage-n" style="color:var(--red)">12</span>
-            <span class="stage-v" style="color:var(--red)">—</span>
-          </div>
-
-          <div class="mini-grid cols3">
-            <div class="mini-stat">
-              <div class="ms-val" style="color:var(--blue)">61%</div>
-              <div class="ms-label">Contatto → Trattativa</div>
-            </div>
-            <div class="mini-stat">
-              <div class="ms-val" style="color:var(--amber)">49%</div>
-              <div class="ms-label">Trattativa → Proposta</div>
-            </div>
-            <div class="mini-stat">
-              <div class="ms-val" style="color:var(--green)">63%</div>
-              <div class="ms-label">Proposta → Chiuso</div>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- Abbonamenti -->
-      <div class="card">
-        <div class="card-header">
-          <div>
-            <div class="card-title">Abbonamenti & Pagamenti</div>
-            <div class="card-sub">Stripe — 505 attivi</div>
-          </div>
-          <span class="pill green">+27 nuovi</span>
-        </div>
-        <div class="card-body">
-
-          <div class="ch-sm">
-            <canvas id="subChart"></canvas>
-          </div>
-
-          <div class="div"></div>
-
-          <div class="prog">
-            <div class="prog-head">
-              <span class="prog-label">Piano Base — €59/mese</span>
-              <span class="prog-val">210</span>
-            </div>
-            <div class="prog-track">
-              <div class="prog-fill" style="width:42%; background:var(--blue)"></div>
-            </div>
-          </div>
-          <div class="prog">
-            <div class="prog-head">
-              <span class="prog-label">Piano Pro — €99/mese</span>
-              <span class="prog-val">198</span>
-            </div>
-            <div class="prog-track">
-              <div class="prog-fill" style="width:39%; background:var(--purple)"></div>
-            </div>
-          </div>
-          <div class="prog">
-            <div class="prog-head">
-              <span class="prog-label">Piano Elite — €149/mese</span>
-              <span class="prog-val">97</span>
-            </div>
-            <div class="prog-track">
-              <div class="prog-fill" style="width:19%; background:var(--green)"></div>
-            </div>
-          </div>
-
-          <div class="div"></div>
-
-          <div class="tag-row">
-            <span class="tag" style="background:var(--red-dim); color:var(--red)">▼ 8 cancellati</span>
-            <span class="tag" style="background:var(--amber-dim); color:var(--amber)">⏱ 34 in scadenza</span>
-            <span class="tag" style="background:var(--red-dim); color:var(--red)">✗ 3 pagamenti falliti</span>
-          </div>
-
-        </div>
-      </div>
-
-    </div>
-
-    <!-- ── ANDAMENTO + LIQUIDITA ──────────────────── -->
-    <div class="g2">
-
-      <!-- Andamento entrate -->
-      <div class="card">
-        <div class="card-header">
-          <div>
-            <div class="card-title">Andamento Entrate</div>
-            <div class="card-sub">Ultimi 6 mesi — Stripe + bonifici bancari</div>
-          </div>
-          <span class="pill blue">6 mesi</span>
-        </div>
-        <div class="card-body">
-          <div class="ch">
-            <canvas id="revenueChart"></canvas>
-          </div>
-        </div>
-      </div>
-
-      <!-- Liquidità -->
-      <div class="card">
-        <div class="card-header">
-          <div>
-            <div class="card-title">Liquidità & Conti</div>
-            <div class="card-sub">Wise · Revolut · Mercury — tutto in EUR</div>
-          </div>
-          <span class="pill blue">€124.830 totale</span>
-        </div>
-        <div class="card-body">
-
-          <div class="account">
-            <div class="acc-left">
-              <div class="acc-icon" style="background:rgba(75,142,245,.12); color:var(--blue)">W</div>
-              <div>
-                <div class="acc-name">Wise</div>
-                <div class="acc-sub">EUR / GBP / USD · 2h fa</div>
-              </div>
-            </div>
-            <div style="text-align:right">
-              <div class="acc-amt">€52.340</div>
-              <div class="acc-mov" style="color:var(--green)">▲ +€4.200 mese</div>
-            </div>
-          </div>
-
-          <div class="account">
-            <div class="acc-left">
-              <div class="acc-icon" style="background:rgba(155,110,245,.12); color:var(--purple)">R</div>
-              <div>
-                <div class="acc-name">Revolut</div>
-                <div class="acc-sub">EUR / USD / GBP · 5h fa</div>
-              </div>
-            </div>
-            <div style="text-align:right">
-              <div class="acc-amt">€41.290</div>
-              <div class="acc-mov" style="color:var(--green)">▲ +€1.800 mese</div>
-            </div>
-          </div>
-
-          <div class="account">
-            <div class="acc-left">
-              <div class="acc-icon" style="background:rgba(245,166,35,.12); color:var(--amber)">M</div>
-              <div>
-                <div class="acc-name">Mercury</div>
-                <div class="acc-sub">USD → EUR · tasso 0.9231</div>
-              </div>
-            </div>
-            <div style="text-align:right">
-              <div class="acc-amt">€31.200</div>
-              <div class="acc-mov" style="color:var(--red)">⚠ sotto soglia min.</div>
-            </div>
-          </div>
-
-          <div class="mini-grid cols2" style="margin-top:14px">
-            <div class="mini-stat">
-              <div class="ms-val" style="color:var(--green)">€68.400</div>
-              <div class="ms-label">Entrate previste 30gg</div>
-            </div>
-            <div class="mini-stat">
-              <div class="ms-val" style="color:var(--amber)">€22.100</div>
-              <div class="ms-label">Uscite fisse mensili</div>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-    </div>
-
-    <!-- ── CAMPAGNE ────────────────────────────────── -->
-    <div class="card">
-      <div class="card-header">
-        <div>
-          <div class="card-title">Campagne & Acquisizione</div>
-          <div class="card-sub">Meta Ads — 3 account · €15.860 spesi questo mese · funnel completo Meta → Close → Stripe</div>
-        </div>
-        <span class="pill blue">ROAS medio 4.2x</span>
-      </div>
-      <div style="overflow-x:auto">
-        <table class="tbl">
-          <thead>
-            <tr>
-              <th>Campagna</th>
-              <th>Account</th>
-              <th>Spesa</th>
-              <th>Lead</th>
-              <th>Entrati in Close</th>
-              <th>Paganti Stripe</th>
-              <th>Costo / Lead</th>
-              <th>Costo / Cliente</th>
-              <th>ROAS</th>
-              <th>Stato</th>
-            </tr>
-          </thead>
+        <div class="card-head"><div><div class="card-title">Deal in evidenza</div><div class="card-sub">Arricchiti con origine Meta e stato Stripe</div></div></div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Cliente</th><th>Fase</th><th>Valore</th><th>Origine</th><th>Stato Stripe</th><th>Ultimo contatto</th></tr></thead>
           <tbody>
-            <tr>
-              <td class="b">Impianti Maggio</td>
-              <td>OralPro IT</td>
-              <td>€4.200</td>
-              <td class="b">118</td>
-              <td>74</td>
-              <td class="g">11</td>
-              <td>€35,6</td>
-              <td>€381,8</td>
-              <td class="g">5.1x</td>
-              <td><span class="status-dot" style="color:var(--green)">● Attiva</span></td>
-            </tr>
-            <tr>
-              <td class="b">Ortodonzia Adulti</td>
-              <td>OralPro IT</td>
-              <td>€3.100</td>
-              <td class="b">89</td>
-              <td>52</td>
-              <td class="g">9</td>
-              <td>€34,8</td>
-              <td>€344,4</td>
-              <td class="g">4.7x</td>
-              <td><span class="status-dot" style="color:var(--green)">● Attiva</span></td>
-            </tr>
-            <tr>
-              <td class="b">Cliniche Nord Italia</td>
-              <td>OralPro Cliniche</td>
-              <td>€3.200</td>
-              <td class="b">82</td>
-              <td>48</td>
-              <td class="g">8</td>
-              <td>€39,0</td>
-              <td>€400,0</td>
-              <td class="bl">4.0x</td>
-              <td><span class="status-dot" style="color:var(--green)">● Attiva</span></td>
-            </tr>
-            <tr>
-              <td class="b">Retargeting Base</td>
-              <td>OralPro Retarg.</td>
-              <td>€2.180</td>
-              <td class="b">89</td>
-              <td>61</td>
-              <td class="g">15</td>
-              <td>€24,5</td>
-              <td class="g">€145,3</td>
-              <td class="g">6.2x</td>
-              <td><span class="status-dot" style="color:var(--green)">● Attiva</span></td>
-            </tr>
-            <tr>
-              <td class="b">Awareness Maggio</td>
-              <td>OralPro IT</td>
-              <td>€2.030</td>
-              <td class="b">63</td>
-              <td>18</td>
-              <td class="r">0</td>
-              <td>€32,2</td>
-              <td class="r">—</td>
-              <td class="r">0x</td>
-              <td><span class="status-dot" style="color:var(--red)">⚠ Critica</span></td>
-            </tr>
-            <tr>
-              <td class="b">Sbiancamento Denti</td>
-              <td>OralPro Cliniche</td>
-              <td>€1.150</td>
-              <td class="b">63</td>
-              <td>34</td>
-              <td class="a">4</td>
-              <td>€18,3</td>
-              <td class="a">€287,5</td>
-              <td class="a">2.8x</td>
-              <td><span class="status-dot" style="color:var(--amber)">◐ In revisione</span></td>
-            </tr>
+            <tr><td class="b">Studio Dentistico Rossi</td><td><span class="pill blue" style="padding:2px 9px">Proposta</span></td><td class="b">€8.400</td><td>Meta · Impianti</td><td class="g">Pagante</td><td>2 giorni fa</td></tr>
+            <tr><td class="b">Clinica Sorriso Milano</td><td><span class="pill amber" style="padding:2px 9px">Trattativa</span></td><td class="b">€12.000</td><td>Passaparola</td><td class="a">In prova</td><td>1 giorno fa</td></tr>
+            <tr><td class="b">Dr. Bianchi & Associati</td><td><span class="pill blue" style="padding:2px 9px">Proposta</span></td><td class="b">€6.200</td><td>Meta · Ortodonzia</td><td>—</td><td>oggi</td></tr>
+            <tr><td class="b">Poliambulatorio Nord</td><td><span class="pill amber" style="padding:2px 9px">Trattativa</span></td><td class="b">€15.500</td><td>Meta · Cliniche</td><td>—</td><td>4 giorni fa</td></tr>
+            <tr><td class="b">Studio Ferretti</td><td><span class="pill red" style="padding:2px 9px">A rischio</span></td><td class="b">€9.800</td><td>Sito web</td><td class="r">Pag. fallito</td><td>32 giorni fa</td></tr>
           </tbody>
-        </table>
+        </table></div>
       </div>
-    </div>
+    </section>
 
-    <!-- ── ALERT ──────────────────────────────────── -->
-    <div class="card">
-      <div class="card-header">
-        <div>
-          <div class="card-title">Alert & Anomalie</div>
-          <div class="card-sub">5 segnalazioni attive — aggiornato 09:41</div>
+    <!-- ═══ TAB: ABBONAMENTI ═══ -->
+    <section class="tab" id="tab-subs">
+      <div class="grid-kpi">
+        <div class="kpi"><div class="kpi-top"><span class="kpi-label">Abbonamenti attivi</span></div><div class="kpi-val">505</div><div class="kpi-foot"><span class="trend up">↑ +27</span><span class="kpi-note">netti</span></div></div>
+        <div class="kpi"><div class="kpi-top"><span class="kpi-label">Cancellati</span></div><div class="kpi-val" style="color:var(--red)">8</div><div class="kpi-foot"><span class="trend down">↓ 1,6%</span><span class="kpi-note">tasso abbandono</span></div></div>
+        <div class="kpi"><div class="kpi-top"><span class="kpi-label">In scadenza 7gg</span></div><div class="kpi-val" style="color:var(--amber)">34</div><div class="kpi-foot"><span class="kpi-note">€3.180 a rischio</span></div></div>
+        <div class="kpi"><div class="kpi-top"><span class="kpi-label">Pagamenti falliti</span></div><div class="kpi-val" style="color:var(--red)">3</div><div class="kpi-foot"><span class="kpi-note">ultime 24h</span></div></div>
+      </div>
+
+      <div class="g2">
+        <div class="card">
+          <div class="card-head"><div><div class="card-title">Distribuzione piani</div><div class="card-sub">Stripe · 505 attivi</div></div></div>
+          <div class="card-body">
+            <div class="ch-sm"><canvas id="subDonut"></canvas></div>
+            <div class="divline"></div>
+            <div class="prog"><div class="prog-head"><span class="prog-lbl">Base · €59/mese</span><span class="prog-val">210</span></div><div class="prog-track"><div class="prog-fill" style="width:42%;background:var(--blue)"></div></div></div>
+            <div class="prog"><div class="prog-head"><span class="prog-lbl">Pro · €99/mese</span><span class="prog-val">198</span></div><div class="prog-track"><div class="prog-fill" style="width:39%;background:var(--orange)"></div></div></div>
+            <div class="prog"><div class="prog-head"><span class="prog-lbl">Elite · €149/mese</span><span class="prog-val">97</span></div><div class="prog-track"><div class="prog-fill" style="width:19%;background:var(--green)"></div></div></div>
+          </div>
         </div>
-        <span class="pill red">5 urgenti</span>
-      </div>
-      <div class="card-body">
-        <div class="alerts">
 
-          <div class="alert-item red">
-            <div class="alert-icon">🔴</div>
-            <div>
-              <div class="alert-title">3 pagamenti falliti nelle ultime 24 ore</div>
-              <div class="alert-desc">Marco Bianchi (€99 · carta scaduta) · Studio Ferretti (€149 · fondi insufficienti) · C. Lombardi (€59 · carta scaduta)</div>
-              <div class="alert-meta">Oggi 07:23 · Fonte: Stripe</div>
-            </div>
-          </div>
-
-          <div class="alert-item amber">
-            <div class="alert-icon">🟡</div>
-            <div>
-              <div class="alert-title">34 abbonamenti in scadenza entro 7 giorni</div>
-              <div class="alert-desc">Valore a rischio: €3.180/mese — nessuna azione di retention attiva</div>
-              <div class="alert-meta">Aggiornato ora · Fonte: Stripe</div>
-            </div>
-          </div>
-
-          <div class="alert-item red">
-            <div class="alert-icon">🔴</div>
-            <div>
-              <div class="alert-title">Campagna "Awareness Maggio" — €2.030 spesi, 0 conversioni</div>
-              <div class="alert-desc">63 lead generati su Meta, 18 entrati in Close, nessuno ha pagato su Stripe. ROAS attuale: 0x</div>
-              <div class="alert-meta">Oggi 09:00 · Fonte: Meta Ads + Close + Stripe</div>
-            </div>
-          </div>
-
-          <div class="alert-item amber">
-            <div class="alert-icon">🟡</div>
-            <div>
-              <div class="alert-title">5 deal fermi da più di 30 giorni in Close</div>
-              <div class="alert-desc">Valore totale bloccato: €47.000 — nessuna attività registrata nell'ultimo mese</div>
-              <div class="alert-meta">Oggi · Fonte: Close CRM</div>
-            </div>
-          </div>
-
-          <div class="alert-item red">
-            <div class="alert-icon">🔴</div>
-            <div>
-              <div class="alert-title">Saldo Mercury sotto la soglia minima impostata</div>
-              <div class="alert-desc">Saldo attuale: $33.800 (≈ €31.200) — soglia minima: €35.000. Valutare trasferimento da Wise o Revolut</div>
-              <div class="alert-meta">Oggi 08:15 · Fonte: Mercury</div>
-            </div>
-          </div>
-
+        <div class="card">
+          <div class="card-head"><div><div class="card-title">Nuovi vs cancellati</div><div class="card-sub">Ultimi 6 mesi</div></div></div>
+          <div class="card-body"><div class="ch-sm" style="height:264px"><canvas id="subBars"></canvas></div></div>
         </div>
       </div>
-    </div>
 
-  </div><!-- /content -->
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">Pagamenti recenti</div><div class="card-sub">Incrociati con il conto bancario di destinazione</div></div></div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Cliente</th><th>Piano</th><th>Importo</th><th>Data</th><th>Conto</th><th>Stato</th></tr></thead>
+          <tbody>
+            <tr><td class="b">Marco Verdi</td><td>Elite</td><td class="b">€149</td><td>5 giu</td><td>Wise</td><td><span class="st" style="color:var(--green)"><span class="st-d" style="background:var(--green)"></span>Riuscito</span></td></tr>
+            <tr><td class="b">Studio Conti</td><td>Pro</td><td class="b">€99</td><td>5 giu</td><td>Revolut</td><td><span class="st" style="color:var(--green)"><span class="st-d" style="background:var(--green)"></span>Riuscito</span></td></tr>
+            <tr><td class="b">Marco Bianchi</td><td>Pro</td><td class="b">€99</td><td>4 giu</td><td>Wise</td><td><span class="st" style="color:var(--red)"><span class="st-d" style="background:var(--red)"></span>Carta scaduta</span></td></tr>
+            <tr><td class="b">Clinica Sole</td><td>Elite</td><td class="b">€149</td><td>4 giu</td><td>Mercury</td><td><span class="st" style="color:var(--green)"><span class="st-d" style="background:var(--green)"></span>Riuscito</span></td></tr>
+            <tr><td class="b">C. Lombardi</td><td>Base</td><td class="b">€59</td><td>4 giu</td><td>Wise</td><td><span class="st" style="color:var(--red)"><span class="st-d" style="background:var(--red)"></span>Carta scaduta</span></td></tr>
+            <tr><td class="b">Dr. Ferrari</td><td>Pro</td><td class="b">€99</td><td>3 giu</td><td>Revolut</td><td><span class="st" style="color:var(--green)"><span class="st-d" style="background:var(--green)"></span>Riuscito</span></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ═══ TAB: LIQUIDITA ═══ -->
+    <section class="tab" id="tab-cash">
+      <div class="grid-kpi">
+        <div class="kpi"><div class="kpi-top"><span class="kpi-label">Liquidità totale</span></div><div class="kpi-val">€124.830</div><div class="kpi-foot"><span class="trend up">↑ 3,1%</span></div></div>
+        <div class="kpi"><div class="kpi-top"><span class="kpi-label">Entrate previste 30gg</span></div><div class="kpi-val" style="color:var(--green)">€68.400</div><div class="kpi-foot"><span class="kpi-note">rinnovi + deal</span></div></div>
+        <div class="kpi"><div class="kpi-top"><span class="kpi-label">Uscite fisse / mese</span></div><div class="kpi-val" style="color:var(--amber)">€22.100</div><div class="kpi-foot"><span class="kpi-note">ricorrenti</span></div></div>
+        <div class="kpi"><div class="kpi-top"><span class="kpi-label">Cassa prevista 60gg</span></div><div class="kpi-val" style="color:var(--blue)">€171k</div><div class="kpi-foot"><span class="trend up">↑ stima</span></div></div>
+      </div>
+
+      <div class="g32">
+        <div class="card">
+          <div class="card-head"><div><div class="card-title">Conti bancari</div><div class="card-sub">Wise · Revolut · Mercury — tutto in EUR</div></div><span class="pill blue">€124.830</span></div>
+          <div class="card-body">
+            <div class="acc"><div class="acc-l"><div class="acc-ic" style="background:var(--blue-soft);color:var(--blue)">W</div><div><div class="acc-name">Wise</div><div class="acc-sub">EUR / GBP / USD · sync 2h fa</div></div></div><div style="text-align:right"><div class="acc-amt">€52.340</div><div class="acc-mov" style="color:var(--green)">↑ +€4.200</div></div></div>
+            <div class="acc"><div class="acc-l"><div class="acc-ic" style="background:var(--orange-soft);color:var(--orange)">R</div><div><div class="acc-name">Revolut</div><div class="acc-sub">EUR / USD / GBP · sync 5h fa</div></div></div><div style="text-align:right"><div class="acc-amt">€41.290</div><div class="acc-mov" style="color:var(--green)">↑ +€1.800</div></div></div>
+            <div class="acc"><div class="acc-l"><div class="acc-ic" style="background:var(--amber-soft);color:var(--amber)">M</div><div><div class="acc-name">Mercury</div><div class="acc-sub">USD → EUR · tasso 0,9231</div></div></div><div style="text-align:right"><div class="acc-amt">€31.200</div><div class="acc-mov" style="color:var(--red)">⚠ sotto soglia</div></div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><div class="card-title">Ripartizione liquidità</div></div>
+          <div class="card-body"><div class="ch"><canvas id="cashDonut"></canvas></div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">Previsione di cassa</div><div class="card-sub">Saldo proiettato · prossimi 6 mesi</div></div><span class="pill green">Trend positivo</span></div>
+        <div class="card-body"><div class="ch"><canvas id="cashForecast"></canvas></div></div>
+      </div>
+    </section>
+
+    <!-- ═══ TAB: CAMPAGNE ═══ -->
+    <section class="tab" id="tab-ads">
+      <div class="grid-kpi">
+        <div class="kpi"><div class="kpi-top"><span class="kpi-label">Spesa totale</span></div><div class="kpi-val">€15.860</div><div class="kpi-foot"><span class="kpi-note">3 account</span></div></div>
+        <div class="kpi"><div class="kpi-top"><span class="kpi-label">Lead generati</span></div><div class="kpi-val">504</div><div class="kpi-foot"><span class="trend up">↑ +62</span></div></div>
+        <div class="kpi"><div class="kpi-top"><span class="kpi-label">Clienti acquisiti</span></div><div class="kpi-val" style="color:var(--green)">47</div><div class="kpi-foot"><span class="kpi-note">da campagne</span></div></div>
+        <div class="kpi"><div class="kpi-top"><span class="kpi-label">ROAS medio</span></div><div class="kpi-val">4,2×</div><div class="kpi-foot"><span class="trend up">↑ 0,3×</span></div></div>
+      </div>
+
+      <div class="g32">
+        <div class="card">
+          <div class="card-head"><div><div class="card-title">Funnel di acquisizione</div><div class="card-sub">Meta → Close → Stripe</div></div></div>
+          <div class="card-body">
+            <div class="stage"><span class="stage-name">Lead (Meta)</span><div class="track"><div class="fill" style="width:100%;background:var(--blue)"></div></div><span class="stage-n" style="color:var(--blue)">504</span><span class="stage-v">€31,5/lead</span></div>
+            <div class="stage"><span class="stage-name">Entrati in Close</span><div class="track"><div class="fill" style="width:58%;background:#6b70e8"></div></div><span class="stage-n">287</span><span class="stage-v">57%</span></div>
+            <div class="stage"><span class="stage-name">In trattativa</span><div class="track"><div class="fill" style="width:31%;background:var(--orange)"></div></div><span class="stage-n">156</span><span class="stage-v">31%</span></div>
+            <div class="stage"><span class="stage-name">Clienti paganti</span><div class="track"><div class="fill" style="width:9%;background:var(--green)"></div></div><span class="stage-n" style="color:var(--green)">47</span><span class="stage-v" style="color:var(--green)">€337/cliente</span></div>
+            <div class="mini c2">
+              <div class="mini-box"><div class="mini-val" style="color:var(--blue)">€31,50</div><div class="mini-lbl">Costo per lead</div></div>
+              <div class="mini-box"><div class="mini-val" style="color:var(--green)">€337,40</div><div class="mini-lbl">Costo per cliente</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><div class="card-title">ROAS per account</div></div>
+          <div class="card-body"><div class="ch"><canvas id="adsRoas"></canvas></div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">Performance campagne</div><div class="card-sub">Chi porta traffico vs chi porta clienti veri</div></div><span class="pill blue">6 campagne</span></div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Campagna</th><th>Account</th><th>Spesa</th><th>Lead</th><th>In Close</th><th>Paganti</th><th>€/cliente</th><th>ROAS</th><th>Stato</th></tr></thead>
+          <tbody>
+            <tr><td class="b">Retargeting Base</td><td>Retarg.</td><td>€2.180</td><td class="b">89</td><td>61</td><td class="g">15</td><td class="g">€145</td><td class="g">6,2×</td><td><span class="st" style="color:var(--green)"><span class="st-d" style="background:var(--green)"></span>Attiva</span></td></tr>
+            <tr><td class="b">Impianti Maggio</td><td>IT</td><td>€4.200</td><td class="b">118</td><td>74</td><td class="g">11</td><td>€382</td><td class="g">5,1×</td><td><span class="st" style="color:var(--green)"><span class="st-d" style="background:var(--green)"></span>Attiva</span></td></tr>
+            <tr><td class="b">Ortodonzia Adulti</td><td>IT</td><td>€3.100</td><td class="b">89</td><td>52</td><td class="g">9</td><td>€344</td><td class="g">4,7×</td><td><span class="st" style="color:var(--green)"><span class="st-d" style="background:var(--green)"></span>Attiva</span></td></tr>
+            <tr><td class="b">Cliniche Nord</td><td>Cliniche</td><td>€3.200</td><td class="b">82</td><td>48</td><td class="g">8</td><td>€400</td><td class="bl">4,0×</td><td><span class="st" style="color:var(--green)"><span class="st-d" style="background:var(--green)"></span>Attiva</span></td></tr>
+            <tr><td class="b">Sbiancamento</td><td>Cliniche</td><td>€1.150</td><td class="b">63</td><td>34</td><td class="a">4</td><td class="a">€288</td><td class="a">2,8×</td><td><span class="st" style="color:var(--amber)"><span class="st-d" style="background:var(--amber)"></span>In revisione</span></td></tr>
+            <tr><td class="b">Awareness Maggio</td><td>IT</td><td>€2.030</td><td class="b">63</td><td>18</td><td class="r">0</td><td class="r">—</td><td class="r">0×</td><td><span class="st" style="color:var(--red)"><span class="st-d" style="background:var(--red)"></span>Critica</span></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ═══ TAB: ALERT ═══ -->
+    <section class="tab" id="tab-alerts">
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">Alert & Anomalie</div><div class="card-sub">5 segnalazioni attive · aggiornato 09:41</div></div><span class="pill red">5 urgenti</span></div>
+        <div class="card-body">
+          <div class="alerts">
+            <div class="alert red">
+              <div class="alert-ic" style="color:var(--red)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 8v5M12 16.5v.5" stroke-linecap="round"/><circle cx="12" cy="12" r="9"/></svg></div>
+              <div><div class="alert-t">3 pagamenti falliti nelle ultime 24 ore</div><div class="alert-d">Marco Bianchi (€99 · carta scaduta) · Studio Ferretti (€149 · fondi insufficienti) · C. Lombardi (€59 · carta scaduta)</div><div class="alert-m">Oggi 07:23 · Stripe</div></div>
+            </div>
+            <div class="alert amber">
+              <div class="alert-ic" style="color:var(--amber)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div><div class="alert-t">34 abbonamenti in scadenza entro 7 giorni</div><div class="alert-d">Valore a rischio €3.180/mese — nessuna azione di retention attiva</div><div class="alert-m">Aggiornato ora · Stripe</div></div>
+            </div>
+            <div class="alert red">
+              <div class="alert-ic" style="color:var(--red)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 17 9 11l4 4 8-9" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 11V6h-5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div><div class="alert-t">Campagna "Awareness Maggio" — €2.030 spesi, 0 conversioni</div><div class="alert-d">63 lead su Meta, 18 entrati in Close, nessun pagamento su Stripe. ROAS 0×</div><div class="alert-m">Oggi 09:00 · Meta + Close + Stripe</div></div>
+            </div>
+            <div class="alert amber">
+              <div class="alert-ic" style="color:var(--amber)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 5h14M5 12h14M5 19h8" stroke-linecap="round"/></svg></div>
+              <div><div class="alert-t">5 deal fermi da più di 30 giorni in Close</div><div class="alert-d">Valore bloccato €47.000 — nessuna attività nell'ultimo mese</div><div class="alert-m">Oggi · Close CRM</div></div>
+            </div>
+            <div class="alert blue">
+              <div class="alert-ic" style="color:var(--blue)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.2"/></svg></div>
+              <div><div class="alert-t">Saldo Mercury sotto la soglia minima</div><div class="alert-d">Attuale ≈ €31.200 · soglia €35.000 — valutare trasferimento da Wise o Revolut</div><div class="alert-m">Oggi 08:15 · Mercury</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
 </main>
 
 <script>
-  Chart.defaults.color = '#7a91b5';
+// ───── DATI PAGINE ─────
+const PAGES = {
+  overview:{t:'Panoramica Generale',s:'Visione consolidata · tutte le fonti'},
+  pipeline:{t:'Pipeline Commerciale',s:'Close CRM · 274 deal attivi'},
+  subs:{t:'Abbonamenti & Pagamenti',s:'Stripe · 505 abbonamenti attivi'},
+  cash:{t:'Liquidità & Conti',s:'Wise · Revolut · Mercury'},
+  ads:{t:'Campagne & Acquisizione',s:'Meta Ads · 3 account'},
+  alerts:{t:'Alert & Anomalie',s:'Monitoraggio in tempo reale'}
+};
+
+// ───── TEMA CHART ─────
+function chartColors(){
+  const cs = getComputedStyle(document.body);
+  return {
+    grid: cs.getPropertyValue('--border').trim(),
+    text: cs.getPropertyValue('--text-2').trim(),
+    blue: cs.getPropertyValue('--blue').trim(),
+    orange: cs.getPropertyValue('--orange').trim(),
+    green: cs.getPropertyValue('--green').trim(),
+    amber: cs.getPropertyValue('--amber').trim(),
+    red: cs.getPropertyValue('--red').trim(),
+    surface: cs.getPropertyValue('--surface').trim()
+  };
+}
+
+let charts = {};
+function destroyCharts(){ Object.values(charts).forEach(c=>c.destroy()); charts={}; }
+
+function buildCharts(){
+  const c = chartColors();
   Chart.defaults.font.family = 'Inter, sans-serif';
   Chart.defaults.font.size = 11;
+  Chart.defaults.color = c.text;
 
-  // ── Doughnut abbonamenti ──────────────────────
-  new Chart(document.getElementById('subChart'), {
-    type: 'doughnut',
-    data: {
-      labels: ['Piano Base (210)', 'Piano Pro (198)', 'Piano Elite (97)'],
-      datasets: [{
-        data: [210, 198, 97],
-        backgroundColor: ['rgba(75,142,245,.75)', 'rgba(155,110,245,.75)', 'rgba(16,217,140,.75)'],
-        borderColor:      ['#4b8ef5', '#9b6ef5', '#10d98c'],
-        borderWidth: 1.5,
-        hoverOffset: 6
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      cutout: '68%',
-      plugins: {
-        legend: {
-          position: 'right',
-          labels: { boxWidth: 10, padding: 14, font: { size: 11 } }
-        }
-      }
-    }
-  });
+  const grid = {color:c.grid}, ticks = {color:c.text};
+  const legend = {position:'top',labels:{boxWidth:9,padding:14,usePointStyle:true,pointStyle:'circle'}};
 
-  // ── Line chart entrate ────────────────────────
-  new Chart(document.getElementById('revenueChart'), {
-    type: 'line',
-    data: {
-      labels: ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno'],
-      datasets: [
-        {
-          label: 'Entrate ricorrenti (Stripe)',
-          data: [28400, 31200, 33800, 35470, 36900, 38450],
-          borderColor: '#4b8ef5',
-          backgroundColor: 'rgba(75,142,245,0.07)',
-          fill: true, tension: 0.4,
-          pointRadius: 4, pointHoverRadius: 6,
-          pointBackgroundColor: '#4b8ef5',
-          borderWidth: 2
-        },
-        {
-          label: 'Entrate una tantum (bonifici)',
-          data: [4200, 2800, 5100, 3900, 4600, 3200],
-          borderColor: '#10d98c',
-          backgroundColor: 'rgba(16,217,140,0.05)',
-          fill: true, tension: 0.4,
-          pointRadius: 4, pointHoverRadius: 6,
-          pointBackgroundColor: '#10d98c',
-          borderWidth: 2
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: 'top',
-          labels: { boxWidth: 10, padding: 16, font: { size: 11 } }
-        },
-        tooltip: {
-          callbacks: {
-            label: ctx => ' €' + ctx.parsed.y.toLocaleString('it-IT')
-          }
-        }
-      },
-      scales: {
-        x: { grid: { color: 'rgba(26,42,69,.6)' }, border: { color: 'rgba(26,42,69,.6)' } },
-        y: {
-          grid: { color: 'rgba(26,42,69,.6)' },
-          border: { color: 'rgba(26,42,69,.6)' },
-          ticks: { callback: v => '€' + (v / 1000).toFixed(0) + 'k' }
-        }
-      }
-    }
+  // OVERVIEW · revenue
+  if(document.getElementById('ovRevenue')) charts.ovRevenue = new Chart(ovRevenue,{type:'line',data:{labels:['Gen','Feb','Mar','Apr','Mag','Giu'],datasets:[
+    {label:'Ricorrenti',data:[28400,31200,33800,35470,36900,38450],borderColor:c.blue,backgroundColor:c.blue+'18',fill:true,tension:.4,borderWidth:2,pointRadius:3,pointBackgroundColor:c.blue},
+    {label:'Una tantum',data:[4200,2800,5100,3900,4600,3200],borderColor:c.orange,backgroundColor:c.orange+'12',fill:true,tension:.4,borderWidth:2,pointRadius:3,pointBackgroundColor:c.orange}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend},scales:{x:{grid,ticks},y:{grid,ticks:{...ticks,callback:v=>'€'+(v/1000)+'k'}}}}});
+
+  // OVERVIEW · source
+  if(document.getElementById('ovSource')) charts.ovSource = new Chart(ovSource,{type:'doughnut',data:{labels:['Meta Ads','Passaparola','Sito web','Altro'],datasets:[{data:[47,21,18,14],backgroundColor:[c.blue,c.orange,c.green,c.amber],borderWidth:0,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'64%',plugins:{legend:{position:'right',labels:{boxWidth:9,padding:13,usePointStyle:true,pointStyle:'circle'}}}}});
+
+  // PIPELINE · forecast
+  if(document.getElementById('pipForecast')) charts.pipForecast = new Chart(pipForecast,{type:'bar',data:{labels:['Sett. 1','Sett. 2','Sett. 3','Sett. 4'],datasets:[{label:'Chiusure previste (€k)',data:[38,52,44,28],backgroundColor:c.blue,borderRadius:6,maxBarThickness:38}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks},y:{grid,ticks:{...ticks,callback:v=>'€'+v+'k'}}}}});
+
+  // SUBS · donut
+  if(document.getElementById('subDonut')) charts.subDonut = new Chart(subDonut,{type:'doughnut',data:{labels:['Base (210)','Pro (198)','Elite (97)'],datasets:[{data:[210,198,97],backgroundColor:[c.blue,c.orange,c.green],borderWidth:0,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'66%',plugins:{legend:{position:'right',labels:{boxWidth:9,padding:13,usePointStyle:true,pointStyle:'circle'}}}}});
+
+  // SUBS · bars
+  if(document.getElementById('subBars')) charts.subBars = new Chart(subBars,{type:'bar',data:{labels:['Gen','Feb','Mar','Apr','Mag','Giu'],datasets:[
+    {label:'Nuovi',data:[31,28,34,29,33,27],backgroundColor:c.green,borderRadius:5,maxBarThickness:18},
+    {label:'Cancellati',data:[9,11,7,10,11,8],backgroundColor:c.red,borderRadius:5,maxBarThickness:18}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend},scales:{x:{grid:{display:false},ticks},y:{grid,ticks}}}});
+
+  // CASH · donut
+  if(document.getElementById('cashDonut')) charts.cashDonut = new Chart(cashDonut,{type:'doughnut',data:{labels:['Wise','Revolut','Mercury'],datasets:[{data:[52340,41290,31200],backgroundColor:[c.blue,c.orange,c.amber],borderWidth:0,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'64%',plugins:{legend:{position:'right',labels:{boxWidth:9,padding:13,usePointStyle:true,pointStyle:'circle'}}}}});
+
+  // CASH · forecast
+  if(document.getElementById('cashForecast')) charts.cashForecast = new Chart(cashForecast,{type:'line',data:{labels:['Giu','Lug','Ago','Set','Ott','Nov'],datasets:[{label:'Saldo proiettato',data:[124830,138000,149500,158200,167000,178400],borderColor:c.green,backgroundColor:c.green+'18',fill:true,tension:.4,borderWidth:2,pointRadius:3,pointBackgroundColor:c.green}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid,ticks},y:{grid,ticks:{...ticks,callback:v=>'€'+(v/1000).toFixed(0)+'k'}}}}});
+
+  // ADS · roas
+  if(document.getElementById('adsRoas')) charts.adsRoas = new Chart(adsRoas,{type:'bar',data:{labels:['OralPro IT','Cliniche','Retarg.'],datasets:[{label:'ROAS',data:[4.9,3.4,6.2],backgroundColor:[c.blue,c.amber,c.green],borderRadius:6,maxBarThickness:46}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid,ticks:{...ticks,callback:v=>v+'×'}},y:{grid:{display:false},ticks}}}});
+}
+
+// ───── NAVIGAZIONE TAB ─────
+const navItems = document.querySelectorAll('.nav-item');
+const tabs = document.querySelectorAll('.tab');
+navItems.forEach(item=>{
+  item.addEventListener('click',()=>{
+    const id = item.dataset.tab;
+    navItems.forEach(n=>n.classList.remove('active'));
+    item.classList.add('active');
+    tabs.forEach(t=>t.classList.remove('active'));
+    document.getElementById('tab-'+id).classList.add('active');
+    document.getElementById('pageTitle').textContent = PAGES[id].t;
+    document.getElementById('pageSub').textContent = PAGES[id].s;
+    // i grafici nei pannelli appena mostrati vanno ridimensionati
+    Object.values(charts).forEach(c=>c.resize());
+    window.scrollTo({top:0,behavior:'smooth'});
   });
+});
+
+// ───── DARK MODE ─────
+const themeBtn = document.getElementById('themeBtn');
+const sunIcon = '<path d="M12 3v2M12 19v2M5 5l1.5 1.5M17.5 17.5 19 19M3 12h2M19 12h2M5 19l1.5-1.5M17.5 6.5 19 5" stroke-linecap="round"/><circle cx="12" cy="12" r="3.5"/>';
+const moonIcon = '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" stroke-linejoin="round"/>';
+themeBtn.addEventListener('click',()=>{
+  document.body.classList.toggle('dark');
+  const dark = document.body.classList.contains('dark');
+  document.getElementById('themeIcon').innerHTML = dark ? sunIcon : moonIcon;
+  destroyCharts();
+  buildCharts();
+});
+
+// ───── DATE MODIFICABILI ─────
+const fromEl = document.getElementById('dateFrom');
+const toEl = document.getElementById('dateTo');
+function fmt(v){
+  const d = new Date(v);
+  return d.toLocaleDateString('it-IT',{day:'numeric',month:'short',year:'numeric'});
+}
+function updatePeriod(){
+  if(fromEl.value && toEl.value){
+    document.getElementById('pageSub').textContent = 'Periodo · '+fmt(fromEl.value)+' → '+fmt(toEl.value);
+  }
+}
+fromEl.addEventListener('change',updatePeriod);
+toEl.addEventListener('change',updatePeriod);
+
+// ───── INIT ─────
+buildCharts();
 </script>
-
 </body>
 </html>
